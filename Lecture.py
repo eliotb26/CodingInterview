@@ -4,6 +4,8 @@ This is the course over winter break to practice for techincal coding interviews
 Also taking notes in the physical notebook and it is recorded. This
 Date: 1/11/2021
 
+All code is on his git https://github.com/shantanutrip/Blog_codes
+
 """
 
 
@@ -123,7 +125,48 @@ class Solution(object):
 
 # 239. https://leetcode.com/problems/sliding-window-maximum/
 
+    #Problem: Not fast enough ; Simple solution
+class Solution(object):
+    def maxSlidingWindow(self, nums, k):
+        """
+        :type nums: List[int]
+        :type k: int
+        :rtype: List[int]
+        """
+        sz = len(nums)
+        ret = []
+        
+        for ind in range(sz-k+1):
+            curr_max = max(nums[ind:ind+k])
+            ret.append(curr_max)
+            
+        return ret 
 
+
+    #inclass solution 
+from collections import deque
+def maxSlidingWindow(nums, k):
+    sz = len(nums)
+    dq = deque() 
+    print(dq)
+    ans = [] 
+    print(dq)
+    # for ind in range(len(nums)): 
+    #     while (dq and ind - dq[-1] >= k):   
+    #         dq.pop()
+    #     while (dq and nums[dq.back()] M= nums[ind]): 
+    #         dq.pop_back()
+    #     dq.back(ind)
+    #     if (ind >= k-1): 
+    #         ans.push_back(nums[dq.front()])
+    
+    # return ans
+
+def main(): 
+    nums = [1,4,2,6,9]
+    k = 3
+    maxSlidingWindow(nums, k)
+main()
 
 
 # 739  https://leetcode.com/problems/daily-temperatures/
@@ -148,4 +191,186 @@ class Solution(object):
                 stack.pop()
             stack.append(ind)
         return ans
+
+
+
+
+### Lecture 1/25/21 
+#Binary Trees
+
+
+
+# 105 https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+
+# Definition for a binary tree node.
+class TreeNode(object):
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution(object):
+    def __init__(self):
+        self.inorder_location = {} 
+        self.preorder = [] 
+        self.inorder = [] 
+        self.preorder_pointer = 0 
+        
+    def treeBuilder(self, left, right): 
+        #take left and right indecies and build the tree
+        if left > right: 
+            #not possible
+            return None
+        if left == right: 
+            #one element in list
+            newNode = TreeNode(val = self.preorder[self.preorder_pointer])
+            self.preorder_pointer += 1 
+            return newNode
+        
+        preorder_element = self.preorder[self.preorder_pointer]
+        element_inorder_location = self.inorder_location[preorder_element]
+        self.preorder_pointer += 1 
+        
+        #recurssive call on left and right halves
+        leftSubtree = self.treeBuilder(left,element_inorder_location-1)
+        rightSubtree = self.treeBuilder(element_inorder_location+1, right)
+        currentRoot = TreeNode(val = preorder_element, left=leftSubtree, right=rightSubtree)
+        return currentRoot
+    
+
+    def buildTree(self, preorder, inorder):
+        """
+        :type preorder: List[int]
+        :type inorder: List[int]
+        :rtype: TreeNode
+        """
+        self.preorder = preorder
+        self.inorder = inorder
+        sz = len(self.preorder)
+        for i in range(0,sz): 
+            self.inorder_location[inorder[i]] = i
+        
+        return self.treeBuilder(0, sz-1)
+            
+            
+
+
+# 987 https://leetcode.com/problems/vertical-order-traversal-of-a-binary-tree/
+
+
+#TODO error in this 
+
+# Definition for a binary tree node.
+class TreeNode(object):
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+class Solution(object):
+    def __init__(self):
+        self.tuple_list = [] 
+        
+    def dfs(self, node, x, y): 
+        if node is None: 
+            return 
+        self.tuple_list.append(x,-y,node.val)  #need to sort 
+        self.dfs(node.left, x-1, y-1)
+        self.dfs(node.right, x+1, y-1)
+        
+    def verticalTraversal(self, root):
+        """
+        :type root: TreeNode
+        :rtype: List[List[int]]
+        """
+        self.dfs(root,0,0)
+        self.tuple_list.sort()
+        sz = len(self.tuple_list)
+        ans = [] 
+        temp = [] 
+        for i in range(0, sz): 
+            if i > 0 and not self.tuple_list[i-1][0] == self.tuple_list[i][0]:
+                ans.append(temp)
+                temp = [] 
+            
+            temp.append(self.tuple_list[i][2])
+        ans.append(temp)
+        return ans
+
+
+
+
+### Lecture 1/27/21 
+## Trie
+# what a trie is: https://github.com/Vikktour/Data-Structures-Algorithms-Implementations/blob/main/1.%20Trie%20-%20converting%20list%20to%20tree%20for%20instant%20access%20to%20targetted%20adjacent%20nodes.py
+
+
+#208  https://leetcode.com/problems/implement-trie-prefix-tree/
+class TrieNode:
+    
+    def __init__(self):
+        self.links = collections.defaultdict(TrieNode)
+        self.endFlag = False
+
+
+class Trie(object):
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.root = TrieNode()        
+
+    def insert(self, word):
+        """
+        Inserts a word into the trie.
+        :type word: str
+        :rtype: None
+        """
+        currentNode = self.root
+        for ch in word: 
+            if ch not in currentNode.links: 
+                newNode = TrieNode() 
+                currentNode.links[ch] = newNode
+            currentNode = currentNode.links[ch]
+        currentNode.endFlag = True
+        
+
+    def search(self, word):
+        """
+        Returns if the word is in the trie.
+        :type word: str
+        :rtype: bool
+        """
+        currentNode = self.root 
+        for ch in word: 
+            if ch not in currentNode.links: 
+                return False
+            currentNode = currentNode.links[ch]
+        return currentNode.endFlag
+
+    def startsWith(self, prefix):
+        """
+        Returns if there is any word in the trie that starts with the given prefix.
+        :type prefix: str
+        :rtype: bool
+        """
+        currentNode = self.root 
+        for ch in prefix: 
+            if ch not in currentNode.links: 
+                return False
+            currentNode = currentNode.links[ch]
+        return True
+
+
+# Your Trie object will be instantiated and called as such:
+# obj = Trie()
+# obj.insert(word)
+# param_2 = obj.search(word)
+# param_3 = obj.startsWith(prefix)
+
+
+
+
+#211  https://leetcode.com/problems/design-add-and-search-words-data-structure/
+
 
